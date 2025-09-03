@@ -112,26 +112,23 @@ The database comes pre-configured with:
 ## Submission Requirements
 
 ### How to Submit
-1. **Create a branch with your name:**
+1. **Fork this repository** to your own GitHub account
+2. **Clone your forked repository:**
    ```bash
-   git checkout -b candidate-[your-name]
-   # Example: git checkout -b candidate-john-doe
+   git clone https://github.com/[your-username]/sde-assessment-test.git
+   cd sde-assessment-test
    ```
 
-2. **Complete your work and commit regularly:**
+3. **Complete your work and commit regularly:**
    ```bash
    git add .
    git commit -m "Descriptive commit message"
+   git push origin main
    ```
 
-3. **Push your branch when ready:**
-   ```bash
-   git push origin candidate-[your-name]
-   ```
+4. **Submit the link to your forked repository** to the hiring team
 
-4. **Notify the hiring team** that your submission is ready
-
-**Important**: Only work on the `main` branch or your own candidate branch. Do not access or modify other candidates' branches.
+**Note**: Work on the `main` branch of your forked repository. This keeps your work separate from other candidates.
 
 ### What to Include
 1. **Code Repository**
