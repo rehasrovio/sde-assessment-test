@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { testConnection, closePool } from "./configs/database";
 import { logger } from "./configs/logger";
 import userRoutes from "./routes/userRoutes";
+import taskRoutes from "./routes/taskRoutes";
 import { errorHandler, notFoundHandler } from "./middlewares/errorHandler";
 import { requestIdMiddleware } from "./middlewares/requestId";
 
@@ -64,6 +65,7 @@ app.get("/health", async (req, res) => {
 
 // API routes
 app.use("/api/users", userRoutes);
+app.use("/api/tasks", taskRoutes);
 
 // Error handling middleware
 app.use(notFoundHandler);
