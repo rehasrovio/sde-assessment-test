@@ -1,11 +1,11 @@
-# User API Documentation
+# Task Management System API Documentation
 
 ## Overview
-This document describes the User API endpoints for the Task Management System. All endpoints follow RESTful conventions and include comprehensive error handling, validation, and logging.
+This document describes the complete API endpoints for the Task Management System. The API provides comprehensive functionality for managing users and tasks with full CRUD operations, filtering, sorting, pagination, and advanced search capabilities.
 
 ## Base URL
 ```
-http://localhost:3001/api/users
+http://localhost:3001/api
 ```
 
 ## Authentication
@@ -21,6 +21,15 @@ Currently, no authentication is required. All endpoints are publicly accessible.
   "error": "Error message",
   "details": "Additional error details"
 }
+```
+
+---
+
+# User API
+
+## Base URL
+```
+http://localhost:3001/api/users
 ```
 
 ## Endpoints
@@ -191,31 +200,357 @@ When a user is deleted, any tasks assigned to that user will have their `assigne
 
 ---
 
+# Task API
+
+## Base URL
+```
+http://localhost:3001/api/tasks
+```
+
+## Endpoints
+
+### 1. Get All Tasks
+**GET** `/api/tasks`
+
+Retrieves all tasks with optional filtering, sorting, and pagination.
+
+#### Query Parameters
+- `status` (optional): Filter by task status (`todo`, `in-progress`, `done`)
+- `priority` (optional): Filter by priority (`low`, `medium`, `high`)
+- `assignedTo` (optional): Filter by assigned user ID or `unassigned`
+- `search` (optional): Search in title and description (case-insensitive)
+- `sortBy` (optional): Sort field (`created_at`, `updated_at`, `due_date`, `title`, `priority`)
+- `sortOrder` (optional): Sort direction (`asc`, `desc`) - defaults to `desc`
+- `limit` (optional): Number of results per page (1-100)
+- `offset` (optional): Number of results to skip
+
+#### Response
+- **Status**: `200 OK`
+- **Body**: Object with tasks array and pagination metadata
+
+```json
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Complete project documentation",
+      "description": "Write comprehensive API documentation",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2024-12-31",
+      "assigned_to": 1,
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-01-15T11:30:00Z",
+      "assigned_user": {
+        "id": 1,
+        "username": "john_doe",
+        "email": "john.doe@example.com",
+        "full_name": "John Doe"
+      }
+    }
+  ],
+  "pagination": {
+    "total": 25,
+    "count": 10,
+    "limit": 10,
+    "offset": 0,
+    "hasMore": true
+  }
+}
+```
+
+#### Error Responses
+- **400 Bad Request**: Invalid query parameters
+- **500 Internal Server Error**: Database connection issues
+
+---
+
+### 2. Get Task by ID
+**GET** `/api/tasks/:id`
+
+Retrieves a specific task by its ID.
+
+#### Parameters
+- `id` (path, required): Task ID (integer)
+
+#### Response
+- **Status**: `200 OK`
+- **Body**: Task object with assigned user information
+
+```json
+{
+  "id": 1,
+  "title": "Complete project documentation",
+  "description": "Write comprehensive API documentation",
+  "status": "in-progress",
+  "priority": "high",
+  "due_date": "2024-12-31",
+  "assigned_to": 1,
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T11:30:00Z",
+  "assigned_user": {
+    "id": 1,
+    "username": "john_doe",
+    "email": "john.doe@example.com",
+    "full_name": "John Doe"
+  }
+}
+```
+
+#### Error Responses
+- **400 Bad Request**: Invalid task ID format
+- **404 Not Found**: Task not found
+- **500 Internal Server Error**: Database connection issues
+
+---
+
+### 3. Create Task
+**POST** `/api/tasks`
+
+Creates a new task in the system.
+
+#### Request Body
+```json
+{
+  "title": "New Task",
+  "description": "Task description (optional)",
+  "status": "todo",
+  "priority": "medium",
+  "due_date": "2024-12-31",
+  "assigned_to": 1
+}
+```
+
+#### Validation Rules
+- `title`: Required, string, 1-200 characters, non-empty
+- `description`: Optional, string, max 1000 characters
+- `status`: Optional, enum (`todo`, `in-progress`, `done`), defaults to `todo`
+- `priority`: Optional, enum (`low`, `medium`, `high`), defaults to `medium`
+- `due_date`: Optional, string, YYYY-MM-DD format
+- `assigned_to`: Optional, integer (user ID) or null
+
+#### Response
+- **Status**: `201 Created`
+- **Body**: Created task object
+
+```json
+{
+  "id": 2,
+  "title": "New Task",
+  "description": "Task description",
+  "status": "todo",
+  "priority": "medium",
+  "due_date": "2024-12-31",
+  "assigned_to": 1,
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T10:30:00Z"
+}
+```
+
+#### Error Responses
+- **400 Bad Request**: Missing required fields, invalid data format, validation errors
+- **500 Internal Server Error**: Database connection issues
+
+---
+
+### 4. Update Task
+**PUT** `/api/tasks/:id`
+
+Updates an existing task.
+
+#### Parameters
+- `id` (path, required): Task ID (integer)
+
+#### Request Body
+```json
+{
+  "title": "Updated Task Title",
+  "description": "Updated description",
+  "status": "in-progress",
+  "priority": "high",
+  "due_date": "2024-12-31",
+  "assigned_to": 2
+}
+```
+
+#### Validation Rules
+- All fields are optional
+- At least one field must be provided
+- Same validation rules as create task
+- `assigned_to` must reference an existing user ID
+
+#### Response
+- **Status**: `200 OK`
+- **Body**: Updated task object
+
+```json
+{
+  "id": 1,
+  "title": "Updated Task Title",
+  "description": "Updated description",
+  "status": "in-progress",
+  "priority": "high",
+  "due_date": "2024-12-31",
+  "assigned_to": 2,
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T12:30:00Z"
+}
+```
+
+#### Error Responses
+- **400 Bad Request**: Invalid task ID, no fields to update, validation errors
+- **404 Not Found**: Task not found
+- **500 Internal Server Error**: Database connection issues
+
+---
+
+### 5. Delete Task
+**DELETE** `/api/tasks/:id`
+
+Deletes a task from the system.
+
+#### Parameters
+- `id` (path, required): Task ID (integer)
+
+#### Response
+- **Status**: `204 No Content`
+- **Body**: Empty
+
+#### Error Responses
+- **400 Bad Request**: Invalid task ID format
+- **404 Not Found**: Task not found
+- **500 Internal Server Error**: Database connection issues
+
+---
+
+## Task Filtering Examples
+
+### Filter by Status
+```bash
+GET /api/tasks?status=in-progress
+```
+
+### Filter by Priority
+```bash
+GET /api/tasks?priority=high
+```
+
+### Filter by Assigned User
+```bash
+GET /api/tasks?assignedTo=1
+```
+
+### Filter Unassigned Tasks
+```bash
+GET /api/tasks?assignedTo=unassigned
+```
+
+### Search Tasks
+```bash
+GET /api/tasks?search=documentation
+```
+
+### Sort Tasks
+```bash
+GET /api/tasks?sortBy=due_date&sortOrder=asc
+```
+
+### Paginate Results
+```bash
+GET /api/tasks?limit=10&offset=20
+```
+
+### Combined Filters
+```bash
+GET /api/tasks?status=todo&priority=high&assignedTo=1&sortBy=due_date&sortOrder=asc&limit=5
+```
+
+---
+
+## Data Models
+
+### User Object
+```json
+{
+  "id": 1,
+  "username": "john_doe",
+  "email": "john.doe@example.com",
+  "full_name": "John Doe",
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T10:30:00Z"
+}
+```
+
+### Task Object
+```json
+{
+  "id": 1,
+  "title": "Task Title",
+  "description": "Task description",
+  "status": "todo",
+  "priority": "medium",
+  "due_date": "2024-12-31",
+  "assigned_to": 1,
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T10:30:00Z",
+  "assigned_user": {
+    "id": 1,
+    "username": "john_doe",
+    "email": "john.doe@example.com",
+    "full_name": "John Doe"
+  }
+}
+```
+
+### Pagination Object
+```json
+{
+  "total": 100,
+  "count": 10,
+  "limit": 10,
+  "offset": 0,
+  "hasMore": true
+}
+```
+
+---
+
 ## Validation Details
 
-### Username Validation
+### Task Title Validation
 - Required for creation
 - Optional for updates
 - Must be a non-empty string
-- Maximum 50 characters
-- Must be unique across all users
+- Maximum 200 characters
 - Leading/trailing whitespace is trimmed
 
-### Email Validation
-- Required for creation
-- Optional for updates
-- Must be a valid email format
-- Maximum 100 characters
-- Must be unique across all users
-- Converted to lowercase
+### Task Description Validation
+- Optional
+- Must be a string if provided
+- Maximum 1000 characters
 - Leading/trailing whitespace is trimmed
 
-### Full Name Validation
-- Required for creation
-- Optional for updates
-- Must be a non-empty string
-- Maximum 100 characters
-- Leading/trailing whitespace is trimmed
+### Task Status Validation
+- Optional
+- Must be one of: `todo`, `in-progress`, `done`
+- Defaults to `todo` for new tasks
+
+### Task Priority Validation
+- Optional
+- Must be one of: `low`, `medium`, `high`
+- Defaults to `medium` for new tasks
+
+### Due Date Validation
+- Optional
+- Must be in YYYY-MM-DD format if provided
+- Must be a valid date
+
+### Assigned User Validation
+- Optional
+- Must be a positive integer (user ID) or null
+- Referenced user must exist
+
+---
 
 ## Error Codes
 
@@ -229,6 +564,8 @@ When a user is deleted, any tasks assigned to that user will have their `assigne
 | 409 | Conflict - Duplicate unique constraint |
 | 500 | Internal Server Error - Server error |
 
+---
+
 ## Logging
 
 All API operations are logged with the following information:
@@ -239,6 +576,8 @@ All API operations are logged with the following information:
 - Error details (if applicable)
 - Context information (user IDs, field names, etc.)
 
+---
+
 ## Testing
 
 The API includes comprehensive test coverage for:
@@ -247,40 +586,100 @@ The API includes comprehensive test coverage for:
 - Error handling
 - Edge cases
 - Performance considerations
+- Filtering, sorting, and pagination
 
 Run tests with:
 ```bash
 npm test
 ```
 
+---
+
 ## Examples
 
-### Create a User
+### Create a Task
 ```bash
-curl -X POST http://localhost:3001/api/users \
+curl -X POST http://localhost:3001/api/tasks \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "jane_doe",
-    "email": "jane.doe@example.com",
-    "full_name": "Jane Doe"
+    "title": "Complete API documentation",
+    "description": "Write comprehensive API documentation for all endpoints",
+    "status": "todo",
+    "priority": "high",
+    "due_date": "2024-12-31",
+    "assigned_to": 1
   }'
 ```
 
-### Get All Users
+### Get All Tasks with Filtering
 ```bash
-curl http://localhost:3001/api/users
+curl "http://localhost:3001/api/tasks?status=in-progress&priority=high&limit=10"
 ```
 
-### Update a User
+### Update a Task
 ```bash
-curl -X PUT http://localhost:3001/api/users/1 \
+curl -X PUT http://localhost:3001/api/tasks/1 \
   -H "Content-Type: application/json" \
   -d '{
-    "full_name": "Jane Smith"
+    "status": "in-progress",
+    "priority": "high"
   }'
 ```
 
-### Delete a User
+### Search Tasks
 ```bash
-curl -X DELETE http://localhost:3001/api/users/1
+curl "http://localhost:3001/api/tasks?search=documentation&sortBy=due_date&sortOrder=asc"
 ```
+
+### Get Unassigned Tasks
+```bash
+curl "http://localhost:3001/api/tasks?assignedTo=unassigned"
+```
+
+### Delete a Task
+```bash
+curl -X DELETE http://localhost:3001/api/tasks/1
+```
+
+---
+
+## Health Check
+
+### System Health
+**GET** `/health`
+
+Check the health status of the API and database connection.
+
+#### Response
+- **Status**: `200 OK` (healthy) or `503 Service Unavailable` (unhealthy)
+- **Body**: Health status object
+
+```json
+{
+  "status": "healthy",
+  "database": true,
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+---
+
+## Rate Limiting
+
+Currently, no rate limiting is implemented. All endpoints are publicly accessible without restrictions.
+
+---
+
+## CORS
+
+The API supports CORS for the following origins:
+- Development: `http://localhost:3000`, `http://localhost:3001`
+- Production: `https://yourdomain.com` (configurable)
+
+---
+
+## Versioning
+
+Current API version: `1.0.0`
+
+The API follows semantic versioning principles. Breaking changes will result in a new major version.
