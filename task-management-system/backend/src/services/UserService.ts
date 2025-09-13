@@ -1,40 +1,33 @@
-import { getPool } from "../config/database";
-import { logger } from "../config/logger";
-
-export interface User {
-  id: number;
-  username: string;
-  email: string;
-  full_name: string;
-  created_at: Date;
-  updated_at: Date;
-}
-
-export interface CreateUserData {
-  username: string;
-  email: string;
-  full_name: string;
-}
-
-export interface UpdateUserData {
-  username?: string;
-  email?: string;
-  full_name?: string;
-}
+import { Pool } from "pg";
+import { getPool } from "../configs/database";
+import { logger } from "../configs/logger";
+import {
+  User,
+  CreateUserData,
+  UpdateUserData,
+} from "../interfaces/userInterface";
 
 export class UserService {
+  private db: Pool;
+
+  constructor() {
+    this.db = getPool();
+  }
+
   // Get all users
-  async getAllUsers(): Promise<User[]> {
+  public getAllUsers = async (): Promise<User[]> => {
     const startTime = Date.now();
     try {
-      const pool = getPool();
-      const result = await pool.query(
+      const result = await this.db.query(
         "SELECT * FROM users ORDER BY created_at DESC"
       );
       logger.logEvent({
         message: "Retrieved all users",
         action: "get_all_users",
-        context: { count: result.rows.length, duration: Date.now() - startTime }
+        context: {
+          count: result.rows.length,
+          duration: Date.now() - startTime,
+        },
       });
       return result.rows;
     } catch (error) {
@@ -42,45 +35,44 @@ export class UserService {
         message: "Failed to retrieve all users",
         action: "get_all_users",
         error: error as Error,
-        context: { duration: Date.now() - startTime }
+        context: { duration: Date.now() - startTime },
       });
       throw error;
     }
-  }
+  };
 
   // Get user by ID
-  async getUserById(id: number): Promise<User | null> {
-    const pool = getPool();
-    const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
-    return result.rows[0] || null;
-  }
+  public getUserById = async (id: number): Promise<User | null> => {
+    const result = await this.db.query("SELECT * FROM users WHERE id = $1", [
+      id,
+    ]);
+    return result.rows[0] as User | null;
+  };
 
   // Get user by username
-  async getUserByUsername(username: string): Promise<User | null> {
-    const pool = getPool();
-    const result = await pool.query("SELECT * FROM users WHERE username = $1", [
-      username,
-    ]);
-    return result.rows[0] || null;
-  }
+  public getUserByUsername = async (username: string): Promise<User | null> => {
+    const result = await this.db.query(
+      "SELECT * FROM users WHERE username = $1",
+      [username]
+    );
+    return result.rows[0] as User | null;
+  };
 
   // Get user by email
-  async getUserByEmail(email: string): Promise<User | null> {
-    const pool = getPool();
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+  public getUserByEmail = async (email: string): Promise<User | null> => {
+    const result = await this.db.query("SELECT * FROM users WHERE email = $1", [
       email,
     ]);
-    return result.rows[0] || null;
-  }
+    return result.rows[0] as User | null;
+  };
 
   // Create new user
-  async createUser(userData: CreateUserData): Promise<User> {
+  public createUser = async (userData: CreateUserData): Promise<User> => {
     const startTime = Date.now();
     try {
-      const pool = getPool();
       const { username, email, full_name } = userData;
 
-      const result = await pool.query(
+      const result = await this.db.query(
         "INSERT INTO users (username, email, full_name) VALUES ($1, $2, $3) RETURNING *",
         [username, email, full_name]
       );
@@ -88,11 +80,11 @@ export class UserService {
       logger.logEvent({
         message: "User created successfully",
         action: "create_user",
-        context: { 
-          userId: result.rows[0].id, 
-          username, 
-          duration: Date.now() - startTime 
-        }
+        context: {
+          userId: result.rows[0].id,
+          username,
+          duration: Date.now() - startTime,
+        },
       });
 
       return result.rows[0];
@@ -101,18 +93,20 @@ export class UserService {
         message: "Failed to create user",
         action: "create_user",
         error: error as Error,
-        context: { 
-          username: userData.username, 
-          duration: Date.now() - startTime 
-        }
+        context: {
+          username: userData.username,
+          duration: Date.now() - startTime,
+        },
       });
       throw error;
     }
-  }
+  };
 
   // Update user
-  async updateUser(id: number, userData: UpdateUserData): Promise<User | null> {
-    const pool = getPool();
+  public updateUser = async (
+    id: number,
+    userData: UpdateUserData
+  ): Promise<User | null> => {
     const fields = [];
     const values = [];
     let paramCount = 1;
@@ -143,24 +137,22 @@ export class UserService {
       ", "
     )} WHERE id = $${paramCount} RETURNING *`;
 
-    const result = await pool.query(query, values);
-    return result.rows[0] || null;
-  }
+    const result = await this.db.query(query, values);
+    return result.rows[0] as User | null;
+  };
 
   // Delete user
-  async deleteUser(id: number): Promise<boolean> {
-    const pool = getPool();
-    const result = await pool.query("DELETE FROM users WHERE id = $1", [id]);
+  public deleteUser = async (id: number): Promise<boolean> => {
+    const result = await this.db.query("DELETE FROM users WHERE id = $1", [id]);
     return result.rowCount !== null && result.rowCount > 0;
-  }
+  };
 
   // Check if user exists
-  async userExists(id: number): Promise<boolean> {
-    const pool = getPool();
-    const result = await pool.query(
+  public userExists = async (id: number): Promise<boolean> => {
+    const result = await this.db.query(
       "SELECT 1 FROM users WHERE id = $1 LIMIT 1",
       [id]
     );
     return result.rows.length > 0;
-  }
+  };
 }

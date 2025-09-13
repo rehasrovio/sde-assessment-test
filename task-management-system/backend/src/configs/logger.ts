@@ -114,14 +114,13 @@ export class Logger {
     eventTimestamp = moment().unix(),
     error,
     context,
-    requestId,
   }: RequestLog): void => {
     const log = {
       logEvent: {
         message,
         action,
         eventTimestamp,
-        requestId,
+        requestId: this.requestId,
       },
       error,
       context,
@@ -143,6 +142,7 @@ export class Logger {
       logEvent: {
         message,
         eventTimestamp,
+        requestId: this.requestId,
       },
       error,
     };

@@ -2,11 +2,11 @@ import express, { Express } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
-import { testConnection, closePool } from "./config/database";
-import { logger } from "./config/logger";
+import { testConnection, closePool } from "./configs/database";
+import { logger } from "./configs/logger";
 import userRoutes from "./routes/userRoutes";
-import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
-import { requestIdMiddleware } from "./middleware/requestId";
+import { errorHandler, notFoundHandler } from "./middlewares/errorHandler";
+import { requestIdMiddleware } from "./middlewares/requestId";
 
 // Load environment variables
 dotenv.config();
