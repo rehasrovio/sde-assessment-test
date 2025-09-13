@@ -117,7 +117,7 @@ export class TaskController {
         pagination: {
           total,
           count: tasks.length,
-          limit: queryParams.limit,
+          limit: queryParams.limit || null,
           offset: queryParams.offset || 0,
           hasMore: queryParams.limit
             ? (queryParams.offset || 0) + tasks.length < total

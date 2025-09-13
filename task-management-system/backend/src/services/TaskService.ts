@@ -163,7 +163,7 @@ export class TaskService {
           t.description,
           t.status,
           t.priority,
-          t.due_date,
+          t.due_date::text as due_date,
           t.assigned_to,
           t.created_at,
           t.updated_at,
@@ -244,7 +244,7 @@ export class TaskService {
           t.description,
           t.status,
           t.priority,
-          t.due_date,
+          t.due_date::text as due_date,
           t.assigned_to,
           t.created_at,
           t.updated_at,
@@ -318,7 +318,7 @@ export class TaskService {
 
       const result = await this.db.query(
         `INSERT INTO tasks (title, description, status, priority, due_date, assigned_to) 
-         VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+         VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, title, description, status, priority, due_date::text as due_date, assigned_to, created_at, updated_at`,
         [
           title,
           description || null,
@@ -416,7 +416,7 @@ export class TaskService {
       values.push(id);
       const query = `UPDATE tasks SET ${fields.join(
         ", "
-      )} WHERE id = $${paramCount} RETURNING *`;
+      )} WHERE id = $${paramCount} RETURNING id, title, description, status, priority, due_date::text as due_date, assigned_to, created_at, updated_at`;
 
       const result = await this.db.query(query, values);
       const updatedTask = result.rows[0] as Task;
