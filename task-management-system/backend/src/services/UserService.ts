@@ -163,6 +163,7 @@ export class UserService {
           action: "create_user_validation_error",
           context: { username },
         });
+
         throw new Error("Username already exists");
       }
 
@@ -174,6 +175,7 @@ export class UserService {
           action: "create_user_validation_error",
           context: { email },
         });
+
         throw new Error("Email already exists");
       }
 
@@ -224,6 +226,7 @@ export class UserService {
           action: "update_user_not_found",
           context: { userId: id },
         });
+
         return null;
       }
 
@@ -238,6 +241,7 @@ export class UserService {
             action: "update_user_validation_error",
             context: { userId: id, username: userData.username },
           });
+
           throw new Error("Username already exists");
         }
       }
@@ -251,6 +255,7 @@ export class UserService {
             action: "update_user_validation_error",
             context: { userId: id, email: userData.email },
           });
+
           throw new Error("Email already exists");
         }
       }
@@ -282,6 +287,7 @@ export class UserService {
           action: "update_user_no_fields",
           context: { userId: id },
         });
+
         throw new Error("No fields to update");
       }
 
@@ -331,6 +337,7 @@ export class UserService {
           action: "delete_user_not_found",
           context: { userId: id },
         });
+
         return false;
       }
 

@@ -115,6 +115,7 @@ export class UserController {
           error: "Missing required fields",
           details: "Username, email, and full_name are required",
         });
+
         return;
       }
 
@@ -279,6 +280,7 @@ export class UserController {
           error: "Invalid user ID",
           details: "User ID must be a valid integer",
         });
+
         return;
       }
 
@@ -295,6 +297,7 @@ export class UserController {
           error: "User not found",
           details: `User with ID ${id} does not exist`,
         });
+
         return;
       }
 
