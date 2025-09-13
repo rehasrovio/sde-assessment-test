@@ -99,13 +99,19 @@ const UserManagementPage: React.FC = () => {
     setEditingUser(null);
   };
 
+  const handleOpenUserForm = () => {
+    setShowUserForm(true);
+    // Scroll to top when opening the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="user-management-page">
       <div className="page-header">
         <h1>User Management</h1>
         <button
           className="btn btn-primary"
-          onClick={() => setShowUserForm(true)}
+          onClick={handleOpenUserForm}
         >
           + New User
         </button>
@@ -126,7 +132,7 @@ const UserManagementPage: React.FC = () => {
             <p>Create the first user to get started.</p>
             <button
               className="btn btn-primary"
-              onClick={() => setShowUserForm(true)}
+              onClick={handleOpenUserForm}
             >
               Create First User
             </button>

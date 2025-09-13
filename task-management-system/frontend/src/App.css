@@ -295,10 +295,20 @@ body {
 
 .status-select {
   padding: 0.5rem;
-  border: 1px solid #d1d5db;
+  border: 2px solid #d1d5db;
   border-radius: 8px;
   font-size: 0.85rem;
   background: white;
+  color: #1f2937;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .status-select.status-todo {
@@ -499,10 +509,11 @@ body {
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 1000;
   padding: 2rem;
+  overflow-y: auto;
 }
 
 .task-form,
@@ -515,6 +526,10 @@ body {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 10001;
+  margin: 2rem auto;
+  transform: translateY(0);
 }
 
 .task-form-header,
@@ -563,11 +578,19 @@ body {
 .form-group textarea,
 .form-group select {
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 2px solid #d1d5db;
   border-radius: 8px;
   font-size: 0.9rem;
   transition: all 0.3s ease;
   background: white;
+  color: #1f2937;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #9ca3af;
+  opacity: 1;
 }
 
 .form-group input:focus,
@@ -575,7 +598,7 @@ body {
 .form-group select:focus {
   outline: none;
   border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .form-group input.error,
@@ -638,14 +661,35 @@ body {
 .filter-group input,
 .filter-group select {
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 2px solid #d1d5db;
   border-radius: 8px;
   font-size: 0.9rem;
   background: white;
+  color: #1f2937;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.filter-group input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .search-input {
   background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.search-input:focus {
+  background: white;
+  border-color: #667eea;
 }
 
 /* Dashboard */

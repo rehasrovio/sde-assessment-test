@@ -215,11 +215,13 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 className={errors.assigned_to ? "error" : ""}
               >
                 <option value="">Unassigned</option>
-                {users.map((user) => (
+                {users && users.length > 0 ? users.map((user) => (
                   <option key={user.id} value={user.id}>
                     {user.full_name} ({user.username})
                   </option>
-                ))}
+                )) : (
+                  <option value="" disabled>Loading users...</option>
+                )}
               </select>
               {errors.assigned_to && (
                 <span className="error-message">{errors.assigned_to}</span>

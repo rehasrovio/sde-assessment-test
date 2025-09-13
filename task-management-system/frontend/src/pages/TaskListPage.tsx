@@ -179,6 +179,12 @@ const TaskListPage: React.FC = () => {
     setEditingTask(null);
   };
 
+  const handleOpenTaskForm = () => {
+    setShowTaskForm(true);
+    // Scroll to top when opening the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleLoadMore = () => {
     if (pagination.hasMore) {
       setPagination((prev) => ({ ...prev, offset: prev.offset + prev.limit }));
@@ -192,7 +198,7 @@ const TaskListPage: React.FC = () => {
         <h1>Task Management</h1>
         <button
           className="btn btn-primary"
-          onClick={() => setShowTaskForm(true)}
+          onClick={handleOpenTaskForm}
         >
           + New Task
         </button>
@@ -235,7 +241,7 @@ const TaskListPage: React.FC = () => {
             <p>Try adjusting your filters or create a new task.</p>
             <button
               className="btn btn-primary"
-              onClick={() => setShowTaskForm(true)}
+              onClick={handleOpenTaskForm}
             >
               Create First Task
             </button>
