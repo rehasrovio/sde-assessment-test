@@ -17,6 +17,7 @@ const TaskListPage: React.FC = () => {
   const [tasks, setTasks] = useState<TaskWithUser[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskWithUser | null>(null);
@@ -36,7 +37,7 @@ const TaskListPage: React.FC = () => {
   const [pagination, setPagination] = useState({
     total: 0,
     count: 0,
-    limit: 20,
+    limit: 9,
     offset: 0,
     hasMore: false,
   });
@@ -55,9 +56,12 @@ const TaskListPage: React.FC = () => {
   const loadTasks = useCallback(
     async (resetPagination = false) => {
       try {
-        setLoading(true);
+        if (resetPagination) {
+          setLoading(true);
+        }
         setError(null);
 
+        const currentOffset = resetPagination ? 0 : pagination.offset;
         const queryParams: TaskQueryParams = {
           search: filters.search || undefined,
           status: (filters.status as any) || undefined,
@@ -71,17 +75,27 @@ const TaskListPage: React.FC = () => {
           sortBy: filters.sortBy as any,
           sortOrder: filters.sortOrder,
           limit: pagination.limit,
-          offset: resetPagination ? 0 : pagination.offset,
+          offset: currentOffset,
         };
 
         const response = await taskApi.getAllTasks(queryParams);
-        setTasks(response.tasks);
+        
+        if (resetPagination) {
+          // Replace tasks when resetting (filter changes, initial load)
+          setTasks(response.tasks);
+        } else {
+          // Append tasks when loading more
+          setTasks(prevTasks => [...prevTasks, ...response.tasks]);
+        }
+        
         setPagination(response.pagination);
       } catch (err) {
         const apiError = handleApiError(err);
         setError(apiError.details);
       } finally {
-        setLoading(false);
+        if (resetPagination) {
+          setLoading(false);
+        }
       }
     },
     [filters, pagination.limit, pagination.offset]
@@ -185,10 +199,45 @@ const TaskListPage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleLoadMore = () => {
-    if (pagination.hasMore) {
-      setPagination((prev) => ({ ...prev, offset: prev.offset + prev.limit }));
-      loadTasks(false);
+  const handleLoadMore = async () => {
+    if (pagination.hasMore && !loadingMore) {
+      setLoadingMore(true);
+      const newOffset = pagination.offset + pagination.limit;
+      
+      try {
+        setError(null);
+
+        const queryParams: TaskQueryParams = {
+          search: filters.search || undefined,
+          status: (filters.status as any) || undefined,
+          priority: (filters.priority as any) || undefined,
+          assignedTo:
+            filters.assignedTo === "unassigned"
+              ? "unassigned"
+              : filters.assignedTo
+              ? Number(filters.assignedTo)
+              : undefined,
+          sortBy: filters.sortBy as any,
+          sortOrder: filters.sortOrder,
+          limit: pagination.limit,
+          offset: newOffset,
+        };
+
+        const response = await taskApi.getAllTasks(queryParams);
+        
+        // Append tasks when loading more, avoiding duplicates
+        setTasks(prevTasks => {
+          const existingIds = new Set(prevTasks.map(task => task.id));
+          const newTasks = response.tasks.filter(task => !existingIds.has(task.id));
+          return [...prevTasks, ...newTasks];
+        });
+        setPagination(response.pagination);
+      } catch (err) {
+        const apiError = handleApiError(err);
+        setError(apiError.details);
+      } finally {
+        setLoadingMore(false);
+      }
     }
   };
 
@@ -226,9 +275,9 @@ const TaskListPage: React.FC = () => {
       <div className="tasks-section">
         <div className="tasks-header">
           <h2>Tasks ({pagination.total})</h2>
-          {pagination.count > 0 && (
+          {tasks.length > 0 && (
             <p className="tasks-info">
-              Showing {pagination.count} of {pagination.total} tasks
+              Showing {Math.min(tasks.length, pagination.total)} of {pagination.total} tasks
             </p>
           )}
         </div>
@@ -260,14 +309,14 @@ const TaskListPage: React.FC = () => {
               ))}
             </div>
 
-            {pagination.hasMore && (
+            {pagination.hasMore && tasks.length < pagination.total && (
               <div className="load-more">
                 <button
                   className="btn btn-secondary"
                   onClick={handleLoadMore}
-                  disabled={loading}
+                  disabled={loadingMore}
                 >
-                  Load More Tasks
+                  {loadingMore ? "Loading..." : "Load More Tasks"}
                 </button>
               </div>
             )}

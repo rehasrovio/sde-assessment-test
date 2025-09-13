@@ -222,15 +222,6 @@ const DashboardPage: React.FC = () => {
           )}
         </div>
 
-        {/* Quick Actions */}
-        <div className="dashboard-section">
-          <h2>Quick Actions</h2>
-          <div className="quick-actions">
-            <button className="btn btn-primary">Create New Task</button>
-            <button className="btn btn-secondary">Manage Users</button>
-            <button className="btn btn-secondary">View All Tasks</button>
-          </div>
-        </div>
       </div>
     </div>
   );
