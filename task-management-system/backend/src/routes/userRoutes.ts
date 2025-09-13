@@ -4,7 +4,7 @@ import {
   validateCreateUser,
   validateUpdateUser,
   validateUserId,
-} from "../middlewares/validation";
+} from "../middlewares/userValidation";
 
 const router = Router();
 const userController = new UserController();
