@@ -14,13 +14,13 @@ export class UserController {
   getAllUsers = async (req: Request, res: Response): Promise<void> => {
     try {
       const users = await this.userService.getAllUsers();
-      
+
       logger.logEvent({
         message: "Users retrieved successfully",
         action: "get_all_users_success",
-        context: { count: users.length }
+        context: { count: users.length },
       });
-      
+
       res.json(users);
     } catch (error) {
       logger.logEvent({
@@ -28,9 +28,9 @@ export class UserController {
         action: "get_all_users_error",
         error: error as Error,
       });
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Failed to fetch users",
-        details: "Internal server error occurred while retrieving users"
+        details: "Internal server error occurred while retrieving users",
       });
     }
   };
@@ -44,12 +44,12 @@ export class UserController {
         logger.logEvent({
           message: "Invalid user ID provided",
           action: "get_user_by_id_validation_error",
-          context: { id: req.params.id }
+          context: { id: req.params.id },
         });
-        
-        res.status(400).json({ 
+
+        res.status(400).json({
           error: "Invalid user ID",
-          details: "User ID must be a valid integer"
+          details: "User ID must be a valid integer",
         });
         return;
       }
@@ -60,12 +60,12 @@ export class UserController {
         logger.logEvent({
           message: "User not found",
           action: "get_user_by_id_not_found",
-          context: { userId: id }
+          context: { userId: id },
         });
-        
-        res.status(404).json({ 
+
+        res.status(404).json({
           error: "User not found",
-          details: `User with ID ${id} does not exist`
+          details: `User with ID ${id} does not exist`,
         });
         return;
       }
@@ -73,7 +73,7 @@ export class UserController {
       logger.logEvent({
         message: "User retrieved successfully",
         action: "get_user_by_id_success",
-        context: { userId: id }
+        context: { userId: id },
       });
 
       res.json(user);
@@ -82,12 +82,12 @@ export class UserController {
         message: "Error fetching user by ID",
         action: "get_user_by_id_error",
         error: error as Error,
-        context: { userId: req.params.id }
+        context: { userId: req.params.id },
       });
-      
-      res.status(500).json({ 
+
+      res.status(500).json({
         error: "Failed to fetch user",
-        details: "Internal server error occurred while retrieving user"
+        details: "Internal server error occurred while retrieving user",
       });
     }
   };
@@ -102,14 +102,18 @@ export class UserController {
         logger.logEvent({
           message: "Missing required fields for user creation",
           action: "create_user_validation_error",
-          context: { 
-            providedFields: { username: !!username, email: !!email, full_name: !!full_name }
-          }
+          context: {
+            providedFields: {
+              username: !!username,
+              email: !!email,
+              full_name: !!full_name,
+            },
+          },
         });
-        
-        res.status(400).json({ 
+
+        res.status(400).json({
           error: "Missing required fields",
-          details: "Username, email, and full_name are required"
+          details: "Username, email, and full_name are required",
         });
         return;
       }
@@ -120,11 +124,11 @@ export class UserController {
       logger.logEvent({
         message: "User created successfully",
         action: "create_user_success",
-        context: { 
+        context: {
           userId: user.id,
           username: user.username,
-          email: user.email
-        }
+          email: user.email,
+        },
       });
 
       res.status(201).json(user);
@@ -133,26 +137,26 @@ export class UserController {
         message: "Error creating user",
         action: "create_user_error",
         error: error as Error,
-        context: { 
+        context: {
           username: req.body.username,
-          email: req.body.email
-        }
+          email: req.body.email,
+        },
       });
 
-      if (error.message === 'Username already exists') {
-        res.status(409).json({ 
+      if (error.message === "Username already exists") {
+        res.status(409).json({
           error: "Username already exists",
-          details: "A user with this username already exists"
+          details: "A user with this username already exists",
         });
-      } else if (error.message === 'Email already exists') {
-        res.status(409).json({ 
+      } else if (error.message === "Email already exists") {
+        res.status(409).json({
           error: "Email already exists",
-          details: "A user with this email already exists"
+          details: "A user with this email already exists",
         });
       } else {
-        res.status(500).json({ 
+        res.status(500).json({
           error: "Failed to create user",
-          details: "Internal server error occurred while creating user"
+          details: "Internal server error occurred while creating user",
         });
       }
     }
@@ -167,12 +171,12 @@ export class UserController {
         logger.logEvent({
           message: "Invalid user ID provided for update",
           action: "update_user_validation_error",
-          context: { id: req.params.id }
+          context: { id: req.params.id },
         });
-        
-        res.status(400).json({ 
+
+        res.status(400).json({
           error: "Invalid user ID",
-          details: "User ID must be a valid integer"
+          details: "User ID must be a valid integer",
         });
         return;
       }
@@ -185,12 +189,13 @@ export class UserController {
         logger.logEvent({
           message: "No fields provided for user update",
           action: "update_user_validation_error",
-          context: { userId: id }
+          context: { userId: id },
         });
-        
-        res.status(400).json({ 
+
+        res.status(400).json({
           error: "No fields to update",
-          details: "At least one field (username, email, full_name) must be provided"
+          details:
+            "At least one field (username, email, full_name) must be provided",
         });
         return;
       }
@@ -201,12 +206,12 @@ export class UserController {
         logger.logEvent({
           message: "User not found for update",
           action: "update_user_not_found",
-          context: { userId: id }
+          context: { userId: id },
         });
-        
-        res.status(404).json({ 
+
+        res.status(404).json({
           error: "User not found",
-          details: `User with ID ${id} does not exist`
+          details: `User with ID ${id} does not exist`,
         });
         return;
       }
@@ -214,10 +219,12 @@ export class UserController {
       logger.logEvent({
         message: "User updated successfully",
         action: "update_user_success",
-        context: { 
+        context: {
           userId: id,
-          updatedFields: Object.keys(userData).filter(key => userData[key as keyof UpdateUserData] !== undefined)
-        }
+          updatedFields: Object.keys(userData).filter(
+            (key) => userData[key as keyof UpdateUserData] !== undefined
+          ),
+        },
       });
 
       res.json(user);
@@ -226,31 +233,31 @@ export class UserController {
         message: "Error updating user",
         action: "update_user_error",
         error: error as Error,
-        context: { 
+        context: {
           userId: req.params.id,
-          updateData: req.body
-        }
+          updateData: req.body,
+        },
       });
 
-      if (error.message === 'Username already exists') {
-        res.status(409).json({ 
+      if (error.message === "Username already exists") {
+        res.status(409).json({
           error: "Username already exists",
-          details: "A user with this username already exists"
+          details: "A user with this username already exists",
         });
-      } else if (error.message === 'Email already exists') {
-        res.status(409).json({ 
+      } else if (error.message === "Email already exists") {
+        res.status(409).json({
           error: "Email already exists",
-          details: "A user with this email already exists"
+          details: "A user with this email already exists",
         });
-      } else if (error.message === 'No fields to update') {
-        res.status(400).json({ 
+      } else if (error.message === "No fields to update") {
+        res.status(400).json({
           error: "No fields to update",
-          details: "At least one field must be provided for update"
+          details: "At least one field must be provided for update",
         });
       } else {
-        res.status(500).json({ 
+        res.status(500).json({
           error: "Failed to update user",
-          details: "Internal server error occurred while updating user"
+          details: "Internal server error occurred while updating user",
         });
       }
     }
@@ -265,12 +272,12 @@ export class UserController {
         logger.logEvent({
           message: "Invalid user ID provided for deletion",
           action: "delete_user_validation_error",
-          context: { id: req.params.id }
+          context: { id: req.params.id },
         });
-        
-        res.status(400).json({ 
+
+        res.status(400).json({
           error: "Invalid user ID",
-          details: "User ID must be a valid integer"
+          details: "User ID must be a valid integer",
         });
         return;
       }
@@ -281,12 +288,12 @@ export class UserController {
         logger.logEvent({
           message: "User not found for deletion",
           action: "delete_user_not_found",
-          context: { userId: id }
+          context: { userId: id },
         });
-        
-        res.status(404).json({ 
+
+        res.status(404).json({
           error: "User not found",
-          details: `User with ID ${id} does not exist`
+          details: `User with ID ${id} does not exist`,
         });
         return;
       }
@@ -294,7 +301,7 @@ export class UserController {
       logger.logEvent({
         message: "User deleted successfully",
         action: "delete_user_success",
-        context: { userId: id }
+        context: { userId: id },
       });
 
       res.status(204).send();
@@ -303,12 +310,12 @@ export class UserController {
         message: "Error deleting user",
         action: "delete_user_error",
         error: error as Error,
-        context: { userId: req.params.id }
+        context: { userId: req.params.id },
       });
-      
-      res.status(500).json({ 
+
+      res.status(500).json({
         error: "Failed to delete user",
-        details: "Internal server error occurred while deleting user"
+        details: "Internal server error occurred while deleting user",
       });
     }
   };
