@@ -1,5 +1,6 @@
 import { Pool } from "pg";
 import dotenv from "dotenv";
+import { logger } from "./logger";
 
 // Load environment variables
 dotenv.config();
@@ -9,7 +10,6 @@ let pool: Pool | null = null;
 
 export const getPool = (): Pool => {
   if (!pool) {
-    console.log("verifying env variables", process.env.DB_USER);
     pool = new Pool({
       host: process.env.DB_HOST || "localhost",
       port: parseInt(process.env.DB_PORT || "5433"),
@@ -23,7 +23,24 @@ export const getPool = (): Pool => {
 
     // Handle pool errors
     pool.on("error", (err: Error) => {
-      console.error("Database pool error:", err);
+      logger.logGenericErrorEvent({
+        message: "Database pool error",
+        error: err
+      });
+    });
+
+    pool.on("connect", () => {
+      logger.logEvent({
+        message: "New database client connected",
+        action: "database_connect"
+      });
+    });
+
+    pool.on("remove", () => {
+      logger.logEvent({
+        message: "Database client removed from pool",
+        action: "database_disconnect"
+      });
     });
   }
   return pool;
@@ -36,9 +53,16 @@ export const testConnection = async (): Promise<boolean> => {
     const client = await pool.connect();
     await client.query("SELECT 1");
     client.release();
+    logger.logEvent({
+      message: "Database connection test successful",
+      action: "database_test"
+    });
     return true;
   } catch (error) {
-    console.error("Database connection failed:", error);
+    logger.logGenericErrorEvent({
+      message: "Database connection failed",
+      error: error as Error
+    });
     return false;
   }
 };
@@ -48,5 +72,9 @@ export const closePool = async (): Promise<void> => {
   if (pool) {
     await pool.end();
     pool = null;
+    logger.logEvent({
+      message: "Database connection pool closed",
+      action: "database_close"
+    });
   }
 };

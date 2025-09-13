@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { UserService, CreateUserData, UpdateUserData } from '../services/UserService';
+import { logger } from '../config/logger';
 
 export class UserController {
   private userService: UserService;
@@ -14,7 +15,11 @@ export class UserController {
       const users = await this.userService.getAllUsers();
       res.json(users);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      logger.logEvent({
+        message: 'Error fetching users',
+        action: 'get_all_users_error',
+        error: error as Error
+      });
       res.status(500).json({ error: 'Failed to fetch users' });
     }
   };

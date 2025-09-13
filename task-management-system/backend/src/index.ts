@@ -3,8 +3,10 @@ import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import { testConnection, closePool } from "./config/database";
+import { logger } from "./config/logger";
 import userRoutes from "./routes/userRoutes";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
+import { requestIdMiddleware } from "./middleware/requestId";
 
 // Load environment variables
 dotenv.config();
@@ -25,6 +27,9 @@ app.use(
     credentials: true,
   })
 );
+
+// Request ID middleware (should be early in the chain)
+app.use(requestIdMiddleware);
 
 // Body parsing middleware
 app.use(express.json());
@@ -67,6 +72,9 @@ app.use(errorHandler);
 // Start server
 const startServer = async () => {
   try {
+    // Initialize logger
+    logger.initialize("task-management-system");
+
     // Test database connection
     const isConnected = await testConnection();
     if (!isConnected) {
@@ -74,12 +82,21 @@ const startServer = async () => {
     }
 
     app.listen(port, () => {
-      console.log(`🚀 Server running at http://localhost:${port}`);
-      console.log(`📊 Database connected successfully`);
-      console.log(`🔧 Environment: ${process.env.NODE_ENV || "development"}`);
+      logger.logEvent({
+        message: "Server started successfully",
+        action: "server_start",
+        context: {
+          port,
+          environment: process.env.NODE_ENV || "development",
+          database: "connected",
+        },
+      });
     });
   } catch (error) {
-    console.error("❌ Failed to start server:", error);
+    logger.logGenericErrorEvent({
+      message: "Failed to start server",
+      error: error as Error,
+    });
     process.exit(1);
   }
 };
