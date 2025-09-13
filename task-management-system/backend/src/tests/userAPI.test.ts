@@ -4,17 +4,11 @@
  */
 
 import request from 'supertest';
-import express from 'express';
 import { logger } from '../configs/logger';
-import userRoutes from '../routes/userRoutes';
-import { errorHandler, notFoundHandler } from '../middlewares/errorHandler';
+import createApp from '../app';
 
-// Create test app
-const app = express();
-app.use(express.json());
-app.use('/api/users', userRoutes);
-app.use(notFoundHandler);
-app.use(errorHandler);
+// Create test app using shared configuration
+const app = createApp();
 
 // Initialize logger for tests
 logger.initialize('user-api-tests');
